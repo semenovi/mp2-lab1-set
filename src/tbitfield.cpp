@@ -4,6 +4,8 @@
 //   Переработано для Microsoft Visual Studio 2008 Сысоевым А.В. (19.04.2015)
 //
 // Битовое поле
+//
+// implementation by madBearing 2018
 
 #include "tbitfield.h"
 
