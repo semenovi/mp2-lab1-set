@@ -17,6 +17,13 @@ TBitField::TBitField(int len)
 	this->MemLen = (this->BitLen + sizeof(TELEM) * BYTE_LENGTH - 1)
 		/ (sizeof(TELEM) * BYTE_LENGTH);
 	this->pMem = new TELEM[MemLen];
+	for (int i = 0; i < this->MemLen; i++)
+	{
+		this->pMem[i] = 0;
+	}
+	if (DEBUG)
+		cout << "Bitfield with size " << this->BitLen
+		<< " and count of blocks " << this->MemLen << " was created" << endl;
 }
 
 TBitField::TBitField(const TBitField &bf) // конструктор копирования
@@ -30,6 +37,8 @@ TBitField::TBitField(const TBitField &bf) // конструктор копиро
 	{
 		this->pMem[i] = bf.pMem[i];
 	}
+	if (DEBUG)
+		cout << "Bitfield was copied" << endl;
 }
 
 TBitField::~TBitField()
@@ -37,6 +46,9 @@ TBitField::~TBitField()
 	if (pMem != nullptr)
 	{
 		delete[] pMem;
+		if (DEBUG)
+			cout << "Bitfield with size " << this->BitLen
+			<< " and count of blocks " << this->MemLen << " was deleted" << endl;
 	}
 }
 
@@ -63,26 +75,34 @@ int TBitField::GetLength(void) const // получить длину (к-во б�
 void TBitField::SetBit(const int n) // установить бит
 {
 	if (n > this->BitLen) throw - 3;
-	this->pMem[this->GetMemIndex(n)] |= 1 << (n % sizeof(TELEM));
+	this->pMem[this->GetMemIndex(n)] |= this->GetMemMask(n % sizeof(TELEM));
+	if (DEBUG)
+		cout << "Bit " << n << " was setted to 1" << endl;
 	return;
 }
 
 void TBitField::ClrBit(const int n) // очистить бит
 {
 	if (n > this->BitLen) throw - 3;
-	this->pMem[this->GetMemIndex(n)] &= ~(1<<(n % sizeof(TELEM)));
+	this->pMem[this->GetMemIndex(n)] &= ~(this->GetMemMask(n % sizeof(TELEM)));
+	if (DEBUG)
+		cout << "Bit " << n << " was setted to 0" << endl;
 	return;
 }
 
 int TBitField::GetBit(const int n) const // получить значение бита
 {
 	if (n > this->BitLen) throw - 3;
-	if ((pMem[this->GetMemIndex(n)] & (1 << (n % sizeof(TELEM)))) != 0)
+	if ((pMem[this->GetMemIndex(n)] & (this->GetMemMask(n % sizeof(TELEM)))) != 0)
 	{
+		if (DEBUG)
+			cout << "Was received value of " << n << " bits: " << 1 << endl;
 		return 1;
 	}
 	else
 	{
+		if (DEBUG)
+			cout << "Was received value of " << n << " bits: " << 0 << endl;
 		return 0;
 	}
 	return -1;
@@ -148,8 +168,20 @@ TBitField TBitField::operator~(void) // отрицание
 istream &operator>>(istream &istr, TBitField &bf) // ввод
 {
 }
+*/
 
 ostream &operator<<(ostream &ostr, const TBitField &bf) // вывод
 {
+	const int BYTE_LENGTH = 8;
+	for (int i = 0; i < bf.MemLen; i++)
+	{
+		/*
+		for (int j = 1; j < (sizeof(TELEM) * BYTE_LENGTH + 1); j++)
+		{
+			ostr << bf.pMem[i] % (int)pow(2, j);
+		}
+		*/
+		ostr << bf.pMem[i] << endl;
+	}
+	return ostr;
 }
-*/
