@@ -4,7 +4,10 @@
 //   Переработано для Microsoft Visual Studio 2008 Сысоевым А.В. (19.04.2015)
 //
 // Множество - реализация через битовые поля
+//
+// implementation by madBearing 2018
 
+/*
 #include "tset.h"
 
 TSet::TSet(int mp) : BitField(-1)
@@ -86,3 +89,4 @@ istream &operator>>(istream &istr, TSet &s) // ввод
 ostream& operator<<(ostream &ostr, const TSet &s) // вывод
 {
 }
+*/

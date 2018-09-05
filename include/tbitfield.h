@@ -4,11 +4,14 @@
 //   Переработано для Microsoft Visual Studio 2008 Сысоевым А.В. (19.04.2015)
 //
 // Битовое поле
+//
+// implementation by madBearing 2018
 
 #ifndef __BITFIELD_H__
 #define __BITFIELD_H__
 
 #include <iostream>
+#include <malloc.h>
 
 using namespace std;
 
@@ -43,8 +46,8 @@ public:
   TBitField  operator&(const TBitField &bf); // операция "и"              (#Л2)
   TBitField  operator~(void);                // отрицание                  (#С)
 
-  friend istream &operator>>(istream &istr, TBitField &bf);       //      (#О7)
-  friend ostream &operator<<(ostream &ostr, const TBitField &bf); //      (#П4)
+//  friend istream &operator>>(istream &istr, TBitField &bf);       //      (#О7)
+//  friend ostream &operator<<(ostream &ostr, const TBitField &bf); //      (#П4)
 };
 // Структура хранения битового поля
 //   бит.поле - набор битов с номерами от 0 до BitLen
