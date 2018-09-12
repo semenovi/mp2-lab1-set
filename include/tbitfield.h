@@ -14,7 +14,8 @@
 #include <malloc.h>
 #include <math.h>
 
-#define DEBUG 0
+//#define DEBUG
+//#define MEM_DEBUG
 
 using namespace std;
 
@@ -31,6 +32,9 @@ private:
 	int   GetMemIndex(const int n) const; // индекс в pМем для бита n       (#О2)
 	TELEM GetMemMask(const int n) const; // битовая маска для бита n       (#О3)
 public:
+#ifdef MEM_DEBUG
+	static int mem_counter;
+#endif
 	TBitField(int len);                //                                   (#О1)
 	TBitField(const TBitField &bf);    //                                   (#П1)
 	~TBitField();                      //                                    (#С)
