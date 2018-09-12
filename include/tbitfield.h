@@ -14,9 +14,6 @@
 #include <malloc.h>
 #include <math.h>
 
-//#define DEBUG
-//#define MEM_DEBUG
-
 using namespace std;
 
 typedef unsigned int TELEM;
