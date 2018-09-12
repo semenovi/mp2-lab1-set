@@ -53,7 +53,7 @@ public:
 	TBitField  operator&(const TBitField &bf); // операция "и"              (#Л2)
 	TBitField  operator~(void);                // отрицание                  (#С)
 
-  //  friend istream &operator>>(istream &istr, TBitField &bf);       //      (#О7)
+	friend istream &operator>>(istream &istr, TBitField &bf);       //      (#О7)
 	friend ostream &operator<<(ostream &ostr, const TBitField &bf); //      (#П4)
 };
 // Структура хранения битового поля

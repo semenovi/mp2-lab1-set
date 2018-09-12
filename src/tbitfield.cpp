@@ -192,11 +192,10 @@ TBitField TBitField::operator~(void) // отрицание
 }
 
 // ввод/вывод
-/*
 istream &operator>>(istream &istr, TBitField &bf) // ввод
 {
+	return istr;
 }
-*/
 
 ostream &operator<<(ostream &ostr, const TBitField &bf) // вывод
 {
