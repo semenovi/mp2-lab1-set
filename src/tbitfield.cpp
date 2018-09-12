@@ -12,19 +12,20 @@
 #ifdef MEM_DEBUG
 int TBitField::mem_counter = 0;
 #endif
+const int BYTE_LENGTH = 8;
 
 TBitField::TBitField(int len)
 {
 	if (len < 1) throw - 1;
-	const int BYTE_LENGTH = 8;
 	BitLen = len;
 	MemLen = ((BitLen + (sizeof(TELEM) * BYTE_LENGTH) - 1)
 		/ (sizeof(TELEM) * BYTE_LENGTH));
+	//cout << sizeof(TELEM);
 	pMem = new TELEM[MemLen];
 #ifdef MEM_DEBUG
 	mem_counter++;
-	cout << "Bitfield with size " << this->BitLen
-	<< " and count of blocks " << this->MemLen << " was created" << endl;
+	cout << "Bitfield with size " << BitLen
+	<< " and count of blocks " << MemLen << " was created" << endl;
 #endif
 	for (int i = 0; i < MemLen; i++)
 	{
@@ -41,8 +42,8 @@ TBitField::TBitField(const TBitField &bf) // конструктор копиро
 	pMem = new TELEM[MemLen];
 #ifdef MEM_DEBUG
 	mem_counter++;
-	cout << "Bitfield with size " << this->BitLen
-		<< " and count of blocks " << this->MemLen << " was created" << endl;
+	cout << "Bitfield with size " << BitLen
+		<< " and count of blocks " << MemLen << " was created" << endl;
 #endif
 	for (int i = 0; i < MemLen; i++)
 	{
@@ -58,36 +59,40 @@ TBitField::~TBitField()
 	delete [] pMem;
 #ifdef MEM_DEBUG
 	mem_counter--;
-	cout << "Bitfield with size " << this->BitLen
-		<< " and count of blocks " << this->MemLen << " was deleted" << endl;
+	cout << "Bitfield with size " << BitLen
+		<< " and count of blocks " << MemLen << " was deleted" << endl;
 #endif
 }
 
 int TBitField::GetMemIndex(const int n) const // индекс Мем для бита n
 {
-	if (n > this->BitLen) throw - 3;
-	return (n / (int)sizeof(TELEM));
+	if (n > BitLen) throw - 3;
+	return (n / (int)(sizeof(TELEM) * BYTE_LENGTH));
 }
 
 TELEM TBitField::GetMemMask(const int n) const // битовая маска для бита n
 {
-	if (n > sizeof(TELEM)) throw - 4;
-	const TELEM zero = 0;
-	//cout << "Mask " << (zero | (1 << n)) << " was generated" << endl;
-	return zero | (1 << n);
+	if (n > (sizeof(TELEM) * BYTE_LENGTH)) throw - 4;
+	TELEM out = 0;
+	TELEM in = 1;
+	TELEM _n = n;
+	out = out | (in << _n);
+	return out;
 }
 
 // доступ к битам битового поля
 
 int TBitField::GetLength(void) const // получить длину (к-во битов)
 {
-	return this->BitLen;
+	return BitLen;
 }
 
 void TBitField::SetBit(const int n) // установить бит
 {
-	if (n > this->BitLen) throw - 3;
-	this->pMem[this->GetMemIndex(n)] |= this->GetMemMask(n % sizeof(TELEM));
+	if (n > BitLen) throw - 3;
+	int index_in_mem = GetMemIndex(n);
+	TELEM mask = GetMemMask(n % (sizeof(TELEM) * BYTE_LENGTH));
+	pMem[index_in_mem] |= mask;
 #ifdef DEBUG
 	cout << "Bit " << n << " was setted to 1" << endl;
 #endif
@@ -96,8 +101,10 @@ void TBitField::SetBit(const int n) // установить бит
 
 void TBitField::ClrBit(const int n) // очистить бит
 {
-	if (n > this->BitLen) throw - 3;
-	this->pMem[this->GetMemIndex(n)] &= ~(this->GetMemMask(n % sizeof(TELEM)));
+	if (n > BitLen) throw - 3;
+	int index_in_mem = GetMemIndex(n);
+	TELEM mask = GetMemMask(n % (sizeof(TELEM) * BYTE_LENGTH));
+	pMem[index_in_mem] &= ~(mask);
 #ifdef DEBUG
 	cout << "Bit " << n << " was setted to 0" << endl;
 #endif
@@ -106,24 +113,13 @@ void TBitField::ClrBit(const int n) // очистить бит
 
 int TBitField::GetBit(const int n) const // получить значение бита
 {
-	if (n > this->BitLen) throw - 3;
-	if ((pMem[this->GetMemIndex(n)]
-		& (this->GetMemMask(n % sizeof(TELEM)))
-		) != 0)
-	{
+	if (n > BitLen) throw - 3;
+	int index_in_mem = GetMemIndex(n);
+	TELEM mask = GetMemMask(n % (sizeof(TELEM) * BYTE_LENGTH));
 #ifdef DEBUG
 		cout << "Was received value of " << n << " bits: " << 1 << endl;
 #endif
-		return 1;
-	}
-	else
-	{
-#ifdef DEBUG
-		cout << "Was received value of " << n << " bits: " << 0 << endl;
-#endif
-		return 0;
-	}
-	return -1;
+	return (pMem[index_in_mem] & (mask));
 }
 
 // битовые операции
@@ -132,21 +128,21 @@ TBitField& TBitField::operator=(const TBitField &bf) // присваивание
 {
 	if (&bf != this)
 	{
-		if (this->BitLen != bf.BitLen)
+		if (BitLen != bf.BitLen)
 		{
-			delete[] this->pMem;
+			delete[] pMem;
 #ifdef MEM_DEBUG
 			mem_counter--;
-			cout << "Bitfield with size " << this->BitLen
-				<< " and count of blocks " << this->MemLen << " was deleted" << endl;
+			cout << "Bitfield with size " << BitLen
+				<< " and count of blocks " << MemLen << " was deleted" << endl;
 #endif
-			this->BitLen = bf.BitLen;
-			this->MemLen = bf.MemLen;
-			this->pMem = new TELEM[MemLen];
+			BitLen = bf.BitLen;
+			MemLen = bf.MemLen;
+			pMem = new TELEM[MemLen];
 		}
-		for (int i = 0; i < this->MemLen; i++)
+		for (int i = 0; i < MemLen; i++)
 		{
-			this->pMem[i] = bf.pMem[i];
+			pMem[i] = bf.pMem[i];
 		}
 	}
 	return *this;
