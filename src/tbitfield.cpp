@@ -127,6 +127,7 @@ TBitField TBitField::operator|(const TBitField &bf) // операция "или"
 	for (int i = 0; i < length; i++)
 		if (GetBit(i) == 1 || bf.GetBit(i) == 1)
 			SetBit(i);
+	BitLen = length;
 	return *this;
 }
 
@@ -140,6 +141,7 @@ TBitField TBitField::operator&(const TBitField &bf) // операция "и"
 			ClrBit(i);
 	for (int i = length; i < BitLen; i++)
 		ClrBit(i);
+	BitLen = length;
 	return *this;
 }
 
