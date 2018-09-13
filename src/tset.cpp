@@ -88,12 +88,11 @@ int TSet::operator!=(const TSet &s) const // сравнение
 
 TSet TSet::operator+(const TSet &s) // объединение
 {
-	TBitField out_bits(
-		(MaxPower > s.MaxPower) ? MaxPower : s.MaxPower
-	);
-	for (int i = 0; i < MaxPower; i++)
+	int length = (MaxPower > s.MaxPower) ? MaxPower : s.MaxPower;
+	TBitField out_bits(length);
+	for (int i = 0; i < length; i++)
 	{
-		if (IsMember(i))
+		if (IsMember(i) || s.IsMember(i))
 			out_bits.SetBit(i);
 	}
 	return TSet(out_bits);
@@ -101,34 +100,45 @@ TSet TSet::operator+(const TSet &s) // объединение
 
 TSet TSet::operator+(const int Elem) // объединение с элементом
 {
-	if (Elem < 0 || Elem > MaxPower) throw 0;
-	TSet out(*this);
-	out.InsElem(Elem);
-	return out;
+	if (Elem > MaxPower || Elem < 0) throw 0;
+	TBitField out_bits(MaxPower);
+	for (int i = 0; i < MaxPower; i++)
+	{
+		if (IsMember(i) || i == Elem)
+			out_bits.SetBit(i);
+	}
+	return TSet(out_bits);
 }
 
 TSet TSet::operator-(const int Elem) // разность с элементом
 {
-	if (Elem < 0 || Elem > MaxPower) throw 0;
-	TSet out(*this);
-	out.DelElem(Elem);
-	return out;
+	if (Elem > MaxPower || Elem < 0) throw 0;
+	TBitField out_bits(MaxPower);
+	for (int i = 0; i < MaxPower; i++)
+	{
+		if (IsMember(i) && i != Elem)
+			out_bits.SetBit(i);
+	}
+	return TSet(out_bits);
 }
 
 TSet TSet::operator*(const TSet &s) // пересечение
 {
-	TBitField out_bits(
-		(MaxPower > s.MaxPower) ? MaxPower : s.MaxPower
-	);
-	out_bits = BitField | s.BitField;
-	TSet out(out_bits);
-	return out;
+	int length = (MaxPower > s.MaxPower) ? MaxPower : s.MaxPower;
+	TBitField out_bits(length);
+	for (int i = 0; i < length; i++)
+	{
+		if (IsMember(i) && s.IsMember(i))
+			out_bits.SetBit(i);
+	}
+	return TSet(out_bits);
 }
 
 TSet TSet::operator~(void) // дополнение
 {
-	TSet out(~BitField);
-	return out;
+	TBitField out_bits(BitField);
+	out_bits = ~out_bits;
+	return TSet(out_bits);
 }
 
 // перегрузка ввода/вывода
