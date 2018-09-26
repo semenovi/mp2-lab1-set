@@ -2,23 +2,37 @@
 #include <iostream>
 #include <conio.h>
 int W = 10, H = 10;
-void change_cell_state(int x, int y, int state, TSet _sheet)
+class matrix
+{
+  TSet * s;
+  int w, h;
+public:
+  matrix(TSet * _s, int _w, int _h) :s(_s), w(_w), h(_h){};
+  int get_bit(int x, int y)
+  {
+    return s->IsMember(x + (y * h));
+  };
+  void change_bit(int x, int y, int i)
+  {
+    if (i)
+      s->InsElem(x + (y * h));
+    else
+      s->DelElem(x + (y * h));
+  };
+};
+void change_cell_state(int x, int y, int state, matrix *_s)
 {
 	if (state > -1 && state < 2 && x > -1 && x < W && y > -1 && y < H)
-	{
-		_sheet.InsElem(x + y * W);
-	}
+    (_s)->change_bit(x, y, 1);
 	else throw(0);
 }
-int get_cell_state(int x, int y, TSet * _sheet)
+int get_cell_state(int x, int y, matrix *_s)
 {
 	if (x > -1 && x < W && y > -1 && y < H)
-	{
-		return (*_sheet).IsMember(x + y * W);
-	}
+    return (_s)->get_bit(x, y);
 	else throw(0);
 }
-void draw_cells(int _cursor, TSet * _sheet)
+void draw_cells(int _cursor, matrix *_s)
 {
 	for (int i = 0; i < H; i++)
 	{
@@ -26,11 +40,11 @@ void draw_cells(int _cursor, TSet * _sheet)
 			if (i * W + j == _cursor)
 				cout << "_ ";
 			else
-				cout << ((*_sheet).IsMember(i * W + j) ? "x" : "-") << " ";
+        cout << ((_s)->get_bit(i, j) ? "x" : "-") << " ";
 		cout << "\n";
 	}
 }
-int get_cell_state_in_next_generation(int _i, TSet * _sheet)
+int get_cell_state_in_next_generation(int _i, matrix * _sheet)
 {
 	int x = 0, y = 0, sum_current = 0;
 
@@ -130,7 +144,7 @@ int get_cell_state_in_next_generation(int _i, TSet * _sheet)
 				);
 		}
 	}
-	if ((*_sheet).IsMember(_i) == 0)
+	if ((_sheet)->get_bit(_i % W, _i / W) == 0)
 	{
 		if (sum_current == 3)
 		{
@@ -138,7 +152,7 @@ int get_cell_state_in_next_generation(int _i, TSet * _sheet)
 		}
 		return 0;
 	}
-	else if ((*_sheet).IsMember(_i) == 1)
+  else if ((_sheet)->get_bit(_i % W, _i / W) == 1)
 	{
 		//printf("%d, %d, %d\n", _i - (_i / W) * W,
 		//	(_i - this->w) - ((_i - this->w) / this->w) * this->w, y);
@@ -150,33 +164,33 @@ int get_cell_state_in_next_generation(int _i, TSet * _sheet)
 	}
 
 }
-void apply_next_generation(TSet * _sheet, TSet * _next_sheet)
+void apply_next_generation(matrix * _sheet, matrix * _next_sheet)
 {
 	for (int i = 0; i < H * W; i++)
 	{
-		if (get_cell_state_in_next_generation(i, _sheet) == 0)
-			(*_next_sheet).DelElem(i);
-		else if (get_cell_state_in_next_generation(i, _sheet) == 1)
-			(*_next_sheet).InsElem(i);
+    if (get_cell_state_in_next_generation(i, _sheet) == 0)
+      (_next_sheet)->change_bit(i % W, i / W, 0);
+    else if (get_cell_state_in_next_generation(i, _sheet) == 1)
+      (_next_sheet)->change_bit(i % W, i / W, 1);
 	}
 	for (int i = 0; i < H * W; i++)
 	{
-		if ((*_next_sheet).IsMember(i))
-			(*_sheet).InsElem(i);
+    if ((_next_sheet)->get_bit(i % W, i / W))
+      (_sheet)->change_bit(i % W, i / W, 1);
 		else
-			(*_sheet).DelElem(i);
+      (_sheet)->change_bit(i % W, i / W, 0);
 	}
 }
-void clear(TSet * _sheet, TSet * _next_sheet)
+void clear(matrix * _sheet, matrix * _next_sheet)
 {
 	for (int i = 0; i < H * W; i++)
-	{
-		(*_sheet).DelElem(i);
-		(*_next_sheet).DelElem(i);
+  {
+    (_sheet)->change_bit(i % W, i / W, 0);
+    (_next_sheet)->change_bit(i % W, i / W, 0);
 	}
 }
 
-int input_reaction(int _in, TSet * _sheet, TSet * _next_sheet)
+int input_reaction(int _in, matrix * _sheet, matrix * _next_sheet)
 {
 	int out = 1;
 	if (_in == 32) //space
@@ -212,6 +226,8 @@ int main()
 		H = in;
 	TSet * sheet = new TSet(W * H);
 	TSet * next_sheet = new TSet(W * H);
+  matrix * sh = new matrix(sheet, W, H);
+  matrix * n_sh = new matrix(sheet, W, H);
 	cout << "Done. Press space to start game\n";
 	cout << "(Use wasd to move, x to create/kill cell, space to live, e to exit)";
 	while (getch() != 32) {}
@@ -222,47 +238,47 @@ int main()
 	in = getch();
 	in = 0;
 	*/
-	draw_cells(cursor, sheet);
+  draw_cells(cursor, sh);
 	while (1)
 	{
 		in = getch();
-		state = input_reaction(in, sheet, next_sheet);
+    state = input_reaction(in, sh, n_sh);
 		system("cls");
 		if (state == 1)
 		{
-			draw_cells(cursor, sheet);
+      draw_cells(cursor, sh);
 		}
 		else if (state == 2)
 		{
 			if ((cursor % W) > 0)
 				cursor--;
-			draw_cells(cursor, sheet);
+      draw_cells(cursor, sh);
 		}
 		else if (state == 3)
 		{
 			if ((cursor / W) < H)
 				cursor += W;
-			draw_cells(cursor, sheet);
+      draw_cells(cursor, sh);
 		}
 		else if (state == 4)
 		{
 			if ((cursor % W) < W)
 				cursor++;
-			draw_cells(cursor, sheet);
+      draw_cells(cursor, sh);
 		}
 		else if (state == 5)
 		{
 			if ((cursor / W) > 0)
 				cursor -= W;
-			draw_cells(cursor, sheet);
+      draw_cells(cursor, sh);
 		}
 		else if (state == 6)
 		{
-			if ((*sheet).IsMember(cursor))
-				(*sheet).DelElem(cursor);
-			else
-				(*sheet).InsElem(cursor);
-			draw_cells(cursor, sheet);
+      if ((sh)->get_bit(cursor % W, cursor / W))
+        (sh)->change_bit(cursor % W, cursor / W, 0);
+      else
+        (sh)->change_bit(cursor % W, cursor / W, 1);
+			draw_cells(cursor, sh);
 		}
 		else
 			break;
